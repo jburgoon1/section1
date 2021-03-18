@@ -31,7 +31,7 @@ function getCategoryIds() {
     for (let id of categories){
         catId.push(id.id)
     }
-    // getCategory(catId);
+    return catId;
 }     
 
 /** Return object with data about a category:
@@ -47,7 +47,7 @@ function getCategoryIds() {
  */
 
 function getCategory(catId) {
-    for (let cat of catId.data){
+    for (let cat of catId){
         categories.push( 
          {
              id:cat.id,
@@ -63,7 +63,7 @@ function getCategory(catId) {
           }
         )
      }
-     console.log(categories)
+     console.log(categories.clues)
 }
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
@@ -75,10 +75,9 @@ function getCategory(catId) {
  */
 
 async function fillTable() {
-    for(let cat of cats){
-        let head = $(`<th><tr></tr></th>`)
-    }
-
+    $('body').append('<table id = "jeopardy"></table>')
+        let head = $('<thead><tr><td>'+getCategoryIds()+'</td></tr></thead>')
+$('#jeopardy').append(head)
 }
 
 /** Handle clicking on a clue: show the question or answer.
@@ -116,19 +115,20 @@ function hideLoadingView() {
 async function setupAndStart() {
     // const random = Math.round(Math.random() * Math.floor(50))
     let cats = await axios.get('http://jservice.io/api/categories',{params:{count:6}})
-    console.log(cats.data.clues_count)
+   
     for (let cat of cats.data){
         categories.push(
             {
                 id:cat.id,
                 title: cat.title,
-                clues:
             }
         )
     }
     console.log(cats.data)
-    let clues = await axios.get('http://jservice.io/api/clues', {params:{category:cats.id}})
-    console.log(clues)
+    
+
+    let clues =  axios.get('http://jservice.io/api/clues', {params:{category:categories.id}})
+    
     getCategoryIds();
     getCategory(clues);
 }
