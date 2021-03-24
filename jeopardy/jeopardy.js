@@ -32,6 +32,7 @@ function getCategoryIds() {
         catId.push(id.id)
         return catId;
     }
+    
 }     
 
 /** Return object with data about a category:
@@ -57,7 +58,8 @@ function getCategory(catId) {
                 {
                     question:cat.question,
                     answer:cat.answer,
-                    showing:null
+                    showing: null
+
                 }
              ]
           }
@@ -75,10 +77,19 @@ function getCategory(catId) {
  */
 
 async function fillTable() {
-    $('body').append('<table id = "jeopardy"><thead><tr></tr></thead></table>')
     for (let cats of categories){
       let head = $('<th>'+cats.title+'</th>')
+      // Need to make this loop through all the clues array
+      for(let clues of cats.clues){
+      let questions = $('<td class = "null" display="none">'+clues.question+'</td>')
+    console.log(questions)  
+    $('#jeopardy tbody').append(questions)
+    }
+      let answers = $('<td display = "none">'+cats.clues[0].answer+'</td>')
 $('#jeopardy thead tr').append(head)
+
+$('#jeopardy tbody').append(answers)
+
     }
 }
 
@@ -92,6 +103,20 @@ $('#jeopardy thead tr').append(head)
 
 function handleClick(evt) {
     evt.preventDefault();
+    
+    for(let cats of categories){
+        console.log(cats.clues[0].showing)
+    if(cats.clues.showing === null){
+        
+        console.log('cool')
+        cats.clues.showing =cats.question;
+        evt.target.display = evt.target.clues.question
+    }else if(evt.target.classList.value === cats.question){
+        evt.target.classList.value =answer;
+    }
+}
+
+
 
 }
 /** Wipe the current Jeopardy board, show the loading spinner,
@@ -116,32 +141,44 @@ function hideLoadingView() {
 
 async function setupAndStart() {
     // const random = Math.round(Math.random() * Math.floor(50))
-    let cats = await axios.get('http://jservice.io/api/categories',{params:{count:6}})
-   
+    let cats = await axios.get('https://jservice.io/api/categories',{params:{count:6}})
     for (let cat of cats.data){
         categories.push(
             {
                 id:cat.id,
                 title: cat.title,
+                clues: []
             }
         )
     }
-    const catId = categories.map(function(){
-        return categories.id
-    })
+    
+    // Loops through the categories and gets the IDs and calls the api
+    for (let cat of categories) {
+    	let clues =  await axios.get('https://jservice.io/api/clues', {params:{category:cat.id}});
+      for (let clue of clues.data) {
+      	cat.clues.push({
+        	question: clue.question,
+          answer: clue.answer
+        });
+       }
+    }
+    
+    
+    console.log('Categories:', categories);
 
-    let clues =  await axios.get('http://jservice.io/api/clues', {params:{category:getCategoryIds(catId)}})
-   
-    getCategoryIds();
-    getCategory(clues);
+		fillTable()
 }
 
 /** On click of start / restart button, set up game. */
 $('button').on('click', function (){
+    // $('#jeopardy').html('')
     setupAndStart()
 })
 // TODO
 
 /** On page load, add event handler for clicking clues */
-
+$('document').ready(function(){
+    $('body').append('<table id = "jeopardy"><thead><tr></tr></thead><tbody><tr></tr></tbody></table>')
+    $('#jeopardy').on('click','td', handleClick)
+})
 // TODO
