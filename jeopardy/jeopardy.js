@@ -81,14 +81,21 @@ async function fillTable() {
       let head = $('<th>'+cats.title+'</th>')
       // Need to make this loop through all the clues array
       for(let clues of cats.clues){
-      let questions = $('<td class = "null" display="none">'+clues.question+'</td>')
+      let questions = $('<td id = "questions" class = "null">'+clues.question+'</td>')
+      
+      let answers = $('<td id = "answers"display = "none">'+clues.answer+'</td>')
+      
+$('#questions').hide();
+$('#questions').append(answers)
+$('#answers').hide();
     console.log(questions)  
     $('#jeopardy tbody').append(questions)
     }
-      let answers = $('<td display = "none">'+cats.clues[0].answer+'</td>')
+      
 $('#jeopardy thead tr').append(head)
 
-$('#jeopardy tbody').append(answers)
+
+
 
     }
 }
@@ -104,17 +111,19 @@ $('#jeopardy tbody').append(answers)
 function handleClick(evt) {
     evt.preventDefault();
     
-    for(let cats of categories){
-        console.log(cats.clues[0].showing)
-    if(cats.clues.showing === null){
-        
-        console.log('cool')
-        cats.clues.showing =cats.question;
-        evt.target.display = evt.target.clues.question
-    }else if(evt.target.classList.value === cats.question){
-        evt.target.classList.value =answer;
+    
+
+    if(evt.target.classList.value === "null"){
+        evt.target.classList = 'question'
+        evt.target.innerText = ''
+    }else if(evt.target.classList.value === 'question'){
+        evt.target.classList.value ='answer';
+        $('#questions').show();
+    }else if (evt.target.classList.value === 'answer'){
+        $('#answers').show();
+
     }
-}
+
 
 
 
@@ -171,7 +180,7 @@ async function setupAndStart() {
 
 /** On click of start / restart button, set up game. */
 $('button').on('click', function (){
-    // $('#jeopardy').html('')
+    
     setupAndStart()
 })
 // TODO
@@ -180,5 +189,6 @@ $('button').on('click', function (){
 $('document').ready(function(){
     $('body').append('<table id = "jeopardy"><thead><tr></tr></thead><tbody><tr></tr></tbody></table>')
     $('#jeopardy').on('click','td', handleClick)
+    $('#jeopardy tbody').html('')
 })
 // TODO
